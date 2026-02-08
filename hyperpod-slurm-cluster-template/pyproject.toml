@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyperpod-slurm-cluster-template"
+version = "1.0.0"
+readme = "README.md"
+authors = [{name = "Amazon Web Services"}]
+license = {text = "Apache-2.0"}
+description = "Versioned JSON-schema + Pydantic models for HyperPod Slurm Cluster configuration"
+requires-python = ">=3.8"
+dependencies = [
+    "pydantic",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hyperpod_slurm_cluster_template*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.json", "*.j2"]
