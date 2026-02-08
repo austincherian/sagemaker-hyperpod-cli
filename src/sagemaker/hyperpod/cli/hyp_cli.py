@@ -11,6 +11,17 @@ from sagemaker.hyperpod.cli.commands.cluster import list_cluster, set_cluster_co
     get_monitoring, describe_cluster
 from sagemaker.hyperpod.cli.commands.cluster_stack import create_cluster_stack, describe_cluster_stack, \
     list_cluster_stacks, update_cluster, delete_cluster_stack
+from sagemaker.hyperpod.cli.commands.slurm_cluster import (
+    slurm_cluster_create,
+    slurm_cluster_describe,
+    slurm_cluster_list,
+    slurm_cluster_update,
+    slurm_cluster_delete,
+    slurm_cluster_update_software,
+    slurm_cluster_list_nodes,
+    slurm_cluster_describe_node,
+    slurm_cluster_scale_down,
+)
 from sagemaker.hyperpod.cli.commands.training import (
     pytorch_create,
     list_jobs,
@@ -197,6 +208,31 @@ def exec():
     pass
 
 
+# New command groups for Slurm cluster operations
+@cli.group(cls=CLICommand)
+def update_software():
+    """Update cluster software (AMI patches)."""
+    pass
+
+
+@cli.group(cls=CLICommand)
+def list_nodes():
+    """List cluster nodes."""
+    pass
+
+
+@cli.group(cls=CLICommand)
+def describe_node():
+    """Describe a cluster node."""
+    pass
+
+
+@cli.group(cls=CLICommand)
+def scale_down():
+    """Scale down cluster by removing nodes."""
+    pass
+
+
 cli.add_command(init)
 cli.add_command(reset)
 cli.add_command(configure)
@@ -211,6 +247,7 @@ create.add_command(_default_create)
 create.add_command(space_create)
 create.add_command(space_template_create)
 create.add_command(space_access_create)
+create.add_command(slurm_cluster_create)
 
 list.add_command(list_jobs)
 list.add_command(js_list)
@@ -218,6 +255,7 @@ list.add_command(custom_list)
 list.add_command(list_cluster_stacks)
 list.add_command(space_list)
 list.add_command(space_template_list)
+list.add_command(slurm_cluster_list)
 
 describe.add_command(pytorch_describe)
 describe.add_command(js_describe)
@@ -227,10 +265,12 @@ describe.add_command(describe_cluster_stack)
 describe.add_command(describe_cluster)
 describe.add_command(space_describe)
 describe.add_command(space_template_describe)
+describe.add_command(slurm_cluster_describe)
 
 update.add_command(update_cluster)
 update.add_command(space_update)
 update.add_command(space_template_update)
+update.add_command(slurm_cluster_update)
 
 delete.add_command(pytorch_delete)
 delete.add_command(js_delete)
@@ -238,6 +278,7 @@ delete.add_command(custom_delete)
 delete.add_command(delete_cluster_stack)
 delete.add_command(space_delete)
 delete.add_command(space_template_delete)
+delete.add_command(slurm_cluster_delete)
 
 start.add_command(space_start)
 
@@ -269,6 +310,12 @@ cli.add_command(get_monitoring)
 cli.add_command(list_accelerator_partition_type)
 
 exec.add_command(pytorch_exec)
+
+# Register Slurm cluster commands for new command groups
+update_software.add_command(slurm_cluster_update_software)
+list_nodes.add_command(slurm_cluster_list_nodes)
+describe_node.add_command(slurm_cluster_describe_node)
+scale_down.add_command(slurm_cluster_scale_down)
 
 if __name__ == "__main__":
     cli()
