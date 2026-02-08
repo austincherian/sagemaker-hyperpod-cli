@@ -7,3 +7,5 @@ warnings.filterwarnings("ignore", message=".*PydanticSerializationUnexpectedValu
 warnings.filterwarnings("ignore", message=".*serializer.*", category=UserWarning, module="pydantic")
 # Suppress kubernetes urllib3 deprecation warning (this is internal dependencies)
 warnings.filterwarnings("ignore", message=".*HTTPResponse.getheaders.*", category=DeprecationWarning, module="kubernetes")
+# Suppress unclosed SSL socket warnings from boto3/urllib3 (these are cleaned up by garbage collection)
+warnings.filterwarnings("ignore", message=".*unclosed.*SSLSocket.*", category=ResourceWarning)
