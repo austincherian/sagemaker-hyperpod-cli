@@ -126,13 +126,13 @@ def init(
     if not skip_readme:
         try:
             readme_path = dir_path / "README.md"
-            with open(readme_path, "w") as f:
+            with open(readme_path, "w", encoding="utf-8") as f:
                 if TEMPLATES[template]["schema_type"] == CFN:
                     f.write(USAGE_GUIDE_TEXT_CFN)
                 else:
                     f.write(USAGE_GUIDE_TEXT_CRD)
         except Exception as e:
-            click.secho("⚠️  README.md generation failed: %s", e, fg="yellow")
+            click.secho(f"⚠️  README.md generation failed: {e}", fg="yellow")
 
     # Convert to relative path for cleaner display
     relative_path = Path(directory) if directory != "." else Path("./")

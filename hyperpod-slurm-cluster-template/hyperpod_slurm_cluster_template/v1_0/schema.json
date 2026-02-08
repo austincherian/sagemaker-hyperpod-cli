@@ -1,0 +1,269 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SlurmClusterTemplateConfig",
+  "description": "Configuration schema for SageMaker HyperPod Slurm cluster",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Configuration schema version"
+    },
+    "template": {
+      "type": "string",
+      "default": "slurm-cluster",
+      "description": "Template type identifier"
+    },
+    "cluster_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 63,
+      "pattern": "^[a-zA-Z0-9](-*[a-zA-Z0-9])*$",
+      "description": "Name of the HyperPod cluster"
+    },
+    "region": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "null"}
+      ],
+      "default": null,
+      "description": "AWS region for the cluster"
+    },
+    "instance_groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/InstanceGroupConfig"
+      },
+      "description": "List of instance group configurations"
+    },
+    "vpc_config": {
+      "$ref": "#/definitions/VpcConfig",
+      "description": "VPC configuration for the cluster"
+    },
+    "node_recovery": {
+      "type": "string",
+      "enum": ["Automatic", "None"],
+      "default": "Automatic",
+      "description": "Node recovery setting (Automatic or None)"
+    },
+    "tags": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        },
+        {"type": "null"}
+      ],
+      "default": null,
+      "description": "AWS resource tags for the cluster"
+    },
+    "slurm_config": {
+      "$ref": "#/definitions/SlurmConfig",
+      "description": "Slurm-specific configuration"
+    }
+  },
+  "required": ["cluster_name", "instance_groups", "vpc_config", "slurm_config"],
+  "additionalProperties": false,
+  "definitions": {
+    "EbsVolumeConfig": {
+      "type": "object",
+      "properties": {
+        "volume_size_in_gb": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384,
+          "description": "Size of the EBS volume in GB"
+        }
+      },
+      "required": ["volume_size_in_gb"],
+      "additionalProperties": false
+    },
+    "InstanceStorageConfig": {
+      "type": "object",
+      "properties": {
+        "ebs_volume_config": {
+          "anyOf": [
+            {"$ref": "#/definitions/EbsVolumeConfig"},
+            {"type": "null"}
+          ],
+          "description": "EBS volume configuration"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LifecycleConfig": {
+      "type": "object",
+      "properties": {
+        "source_s3_uri": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^s3://[a-z0-9][a-z0-9.-]*[a-z0-9]/.+$",
+          "description": "S3 URI containing lifecycle scripts"
+        },
+        "on_create": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Script to run during instance creation"
+        }
+      },
+      "required": ["source_s3_uri", "on_create"],
+      "additionalProperties": false
+    },
+    "InstanceGroupConfig": {
+      "type": "object",
+      "properties": {
+        "instance_group_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 63,
+          "description": "Name of the instance group"
+        },
+        "instance_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "EC2 instance type"
+        },
+        "instance_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of instances in the group"
+        },
+        "execution_role": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^arn:aws:iam::\\d{12}:role/.+$",
+          "description": "IAM role ARN for instance execution"
+        },
+        "lifecycle_config": {
+          "$ref": "#/definitions/LifecycleConfig",
+          "description": "Lifecycle configuration"
+        },
+        "instance_storage_configs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InstanceStorageConfig"
+              }
+            },
+            {"type": "null"}
+          ],
+          "description": "Storage configurations for instances"
+        },
+        "threads_per_core": {
+          "anyOf": [
+            {"type": "integer", "minimum": 1},
+            {"type": "null"}
+          ],
+          "description": "Number of threads per CPU core"
+        }
+      },
+      "required": ["instance_group_name", "instance_type", "instance_count", "execution_role", "lifecycle_config"],
+      "additionalProperties": false
+    },
+    "VpcConfig": {
+      "type": "object",
+      "properties": {
+        "subnets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^subnet-[a-f0-9]+$"
+          },
+          "description": "List of subnet IDs"
+        },
+        "security_group_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^sg-[a-f0-9]+$"
+          },
+          "description": "List of security group IDs"
+        }
+      },
+      "required": ["subnets", "security_group_ids"],
+      "additionalProperties": false
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Tag key"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Tag value"
+        }
+      },
+      "required": ["key", "value"],
+      "additionalProperties": false
+    },
+    "WorkerGroupConfig": {
+      "type": "object",
+      "properties": {
+        "instance_group_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the instance group for this worker group"
+        },
+        "partition_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Slurm partition name"
+        }
+      },
+      "required": ["instance_group_name", "partition_name"],
+      "additionalProperties": false
+    },
+    "SlurmConfig": {
+      "type": "object",
+      "properties": {
+        "controller_group": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instance group name for the Slurm controller"
+        },
+        "login_group": {
+          "anyOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ],
+          "description": "Instance group name for Slurm login nodes"
+        },
+        "worker_groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/WorkerGroupConfig"
+          },
+          "description": "List of worker group configurations"
+        },
+        "fsx_dns_name": {
+          "anyOf": [
+            {"type": "string"},
+            {"type": "null"}
+          ],
+          "description": "FSx file system DNS name"
+        },
+        "fsx_mountname": {
+          "anyOf": [
+            {"type": "string"},
+            {"type": "null"}
+          ],
+          "description": "FSx mount name"
+        }
+      },
+      "required": ["controller_group", "worker_groups"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -2,6 +2,11 @@ from hyperpod_jumpstart_inference_template.registry import SCHEMA_REGISTRY as JS
 from hyperpod_custom_inference_template.registry import SCHEMA_REGISTRY as CUSTOM_EP_REG, TEMPLATE_REGISTRY as CUSTOM_EP_TEMPLATE_REG
 from hyperpod_pytorch_job_template.registry import SCHEMA_REGISTRY as PYTORCH_JOB_REG, TEMPLATE_REGISTRY as PYTORCH_JOB_TEMPLATE_REG
 from hyperpod_cluster_stack_template.registry import SCHEMA_REGISTRY as CLUSTER_REG, TEMPLATE_REGISTRY as CLUSTER_TEMPLATE_REG
+from hyperpod_slurm_cluster_template.registry import (
+    SCHEMA_REGISTRY as SLURM_CLUSTER_REG,
+    TEMPLATE_REGISTRY as SLURM_CLUSTER_TEMPLATE_REG,
+    PROVISIONING_PARAMS_REGISTRY as SLURM_PROVISIONING_PARAMS_REG,
+)
 
 import sys
 
@@ -10,6 +15,7 @@ import sys
 
 CRD = "crd"
 CFN = "cfn"
+SAGEMAKER_API = "sagemaker_api"  # New schema type for direct SageMaker API calls
 TEMPLATES = {
     "hyp-jumpstart-endpoint": {
         "registry": JS_EP_REG,
@@ -37,6 +43,14 @@ TEMPLATES = {
         "template_registry": CLUSTER_TEMPLATE_REG,
         "schema_pkg": "hyperpod_cluster_stack_template",
         "schema_type": CFN,
+        'type': "jinja"
+    },
+    "slurm-cluster": {
+        "registry": SLURM_CLUSTER_REG,
+        "template_registry": SLURM_CLUSTER_TEMPLATE_REG,
+        "provisioning_params_registry": SLURM_PROVISIONING_PARAMS_REG,
+        "schema_pkg": "hyperpod_slurm_cluster_template",
+        "schema_type": SAGEMAKER_API,
         'type': "jinja"
     }
 }
@@ -145,8 +159,8 @@ If you insist, re-init as 'hyp-custom-endpoint' instead? [y/N]:
 The `configure` command updates specific fields in your `config.yaml` file without modifying other values.
 
 ```bash
-hyp configure \
-    --stack-name my-stack \
+hyp configure \\
+    --stack-name my-stack \\
     --create-fsx-stack: False
 ```
 
@@ -196,8 +210,8 @@ A typical workflow might look like:
 
 2. Configure required parameters:
    ```bash
-   hyp configure \
-       --stack-name my-stack \
+   hyp configure \\
+       --stack-name my-stack \\
        --create-fsx-stack: False
    ```
 
@@ -282,8 +296,8 @@ If you insist, re-init as 'hyp-custom-endpoint' instead? [y/N]:
 The `configure` command updates specific fields in your `config.yaml` file without modifying other values.
 
 ```bash
-hyp configure \
-    --instance-type ml.g5.12xlarge \
+hyp configure \\
+    --instance-type ml.g5.12xlarge \\
     --model-version 2.0.4
 ```
 
@@ -333,9 +347,9 @@ A typical workflow might look like:
 
 2. Configure required parameters:
    ```bash
-   hyp configure \
-       --model-id meta-textgeneration-llama-3-70b \
-       --instance-type ml.g5.8xlarge \
+   hyp configure \\
+       --model-id meta-textgeneration-llama-3-70b \\
+       --instance-type ml.g5.8xlarge \\
        --endpoint-name my-llama-endpoint
    ```
 
